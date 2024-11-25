@@ -19,7 +19,6 @@ const prisma = new PrismaClient()
 // }
 
 const fetchAnime = async (req: Request, res: Response) => {
-    // console.log("🚀 ~ fetchAnime ~ req:", req)
     const { page, limit, order, search } = req.query
     try {
         const response = await axios.get('https://shikimori.one/api/animes', {
@@ -31,7 +30,6 @@ const fetchAnime = async (req: Request, res: Response) => {
                 locale: 'en'
             }
         })
-        console.log("🚀 ~ fetchAnime ~ response:", response)
         res.json(SuccessResponse('Anime fetched successfully', response.data))
     } catch (error) {
         res.status(500).json({ error: 'Error fetching anime data' })
@@ -41,11 +39,7 @@ const fetchAnime = async (req: Request, res: Response) => {
 const fetchAnimeById = async (req: Request, res: Response) => {
     const { id } = req.params
     try {
-        const response = await axios.get(`https://shikimori.one/api/animes/${id}` , {
-            params: {
-                locale: 'en' // Add this line to specify the language
-            }
-        })
+        const response = await axios.get(`https://api.jikan.moe/v4/anime/${id}`)
         res.json(SuccessResponse('Anime fetched successfully', response.data))
     } catch (error) {
         res.status(500).json({ error: 'Error fetching anime data' })
@@ -124,4 +118,4 @@ const fetchSeriesById = async (req: Request, res: Response) => {
     }
 }
 
-export { fetchAnime, fetchMovies, fetchSeries, fetchAnimeById, fetchMovieById, fetchSeriesById }
+export {fetchAnime, fetchMovies,fetchSeries,fetchAnimeById,fetchMovieById,fetchSeriesById}

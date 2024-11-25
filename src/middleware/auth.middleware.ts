@@ -15,3 +15,4 @@ export const validateToken = async (req: any, res: any, next: any) => {
         return res.status(401).json({ message: 'Unauthorized' })
     }
 }
+

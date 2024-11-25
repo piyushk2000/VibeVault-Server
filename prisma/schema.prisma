@@ -7,7 +7,6 @@ datasource db {
   url      = "postgresql://postgres:piyupiyu@localhost:5432/vibe?schema=public"
 }
 
-
 model Profile {
   id     Int     @id @default(autoincrement())
   bio    String?
@@ -16,13 +15,50 @@ model Profile {
 }
 
 model User {
-  id      Int      @id @default(autoincrement())
-  name    String?  @db.VarChar(255)
-  email   String   @unique @db.VarChar(255)
-  Profile Profile?
+  id        Int         @id @default(autoincrement())
+  name      String?     @db.VarChar(255)
+  email     String      @unique @db.VarChar(255)
+  password  String?     @db.VarChar(255)
+  Profile   Profile?
+  userMedia userMedia[]
 }
 
-model Tag {
-  id    Int    @id @default(autoincrement())
-  name  String
+enum MediaType {
+  ANIME
+  MOVIE
+  SHOW
+}
+
+enum Status {
+  WATCHING
+  COMPLETED
+  PLAN_TO_WATCH
+  DROPPED
+}
+
+model Media {
+  id          Int         @id @default(autoincrement())
+  type        MediaType
+  apiId       Int
+  title       String
+  description String
+  genres      String[]
+  image       String
+  meta        Json
+  userMedias  userMedia[]
+}
+
+model userMedia {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  mediaId   Int
+  type      MediaType
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media     Media     @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  status    Status
+  rating    Int?
+  review    String?
+  progress  Int?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }

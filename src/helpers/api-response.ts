@@ -15,11 +15,10 @@ export function SuccessResponse<T>(message: string, data: T | null): ApiResponse
     };
   }
   
-export function FailureResponse<T>(message: any,sentryId: any): ApiResponse<T> {
+export function FailureResponse<T>(message: any): ApiResponse<T> {
     return {
       success: false,
       message,
       data: null,
-      eventId: sentryId
     };
   }

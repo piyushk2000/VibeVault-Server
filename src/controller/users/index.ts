@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { FailureResponse, SuccessResponse } from "../../helpers/api-response";
 
 const prisma = new PrismaClient();
-const JWT_SECRET = "xyz";
+const JWT_SECRET = process.env.JWT_SECRET || "xyz";
 const SALT_ROUNDS = 10;
 
 interface SignUpBody {
@@ -50,7 +50,7 @@ const signUp = async (req: any, res: any) => {
     res.json(
       SuccessResponse("User created successfully", {
         token,
-        ...userWithoutPassword,
+        user: userWithoutPassword,
       })
     );
   } catch (error) {
@@ -81,7 +81,7 @@ const signIn = async (req: any, res: any) => {
     const token = jwt.sign({ userId: user.id }, JWT_SECRET);
     const { password: _, ...userWithoutPassword } = user;
     res.json(
-      SuccessResponse("Login successful", { token, ...userWithoutPassword })
+      SuccessResponse("Login successful", { token, user: userWithoutPassword })
     );
   } catch (error) {
     res.status(500).json(FailureResponse("Error during login", "5039"));

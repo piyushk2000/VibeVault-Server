@@ -8,10 +8,14 @@ datasource db {
 }
 
 model Profile {
-  id     Int     @id @default(autoincrement())
-  bio    String?
-  userId Int     @unique
-  User   User    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id        Int      @id @default(autoincrement())
+  bio       String?
+  interests String[]
+  avatar    Bytes?   // Store profile picture as blob
+  userId    Int      @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model User {
@@ -19,8 +23,23 @@ model User {
   name      String?     @db.VarChar(255)
   email     String      @unique @db.VarChar(255)
   password  String?     @db.VarChar(255)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt @default(now())
   Profile   Profile?
   userMedia userMedia[]
+  matches   Match[]     @relation("UserMatches")
+  matchedBy Match[]     @relation("MatchedByUsers")
+  
+  // Swipe relations
+  swipes    Swipe[]     @relation("UserSwipes")
+  swipedBy  Swipe[]     @relation("SwipedByUsers")
+  
+  // Connection relations
+  connections1 Connection[] @relation("UserConnections1")
+  connections2 Connection[] @relation("UserConnections2")
+  
+  // Message relation
+  messages Message[]
 }
 
 model Media {
@@ -48,6 +67,79 @@ model userMedia {
   updatedAt DateTime  @updatedAt
   media     Media     @relation(fields: [mediaId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Match {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  matchedUserId   Int
+  matchPercentage Float    @default(0)
+  commonMediaIds  Int[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user        User @relation("UserMatches", fields: [userId], references: [id], onDelete: Cascade)
+  matchedUser User @relation("MatchedByUsers", fields: [matchedUserId], references: [id], onDelete: Cascade)
+}
+
+model Swipe {
+  id        Int       @id @default(autoincrement())
+  swiperId  Int       // User who swiped
+  swipedId  Int       // User who was swiped on
+  action    SwipeAction // LIKE or PASS
+  createdAt DateTime  @default(now())
+  
+  swiper User @relation("UserSwipes", fields: [swiperId], references: [id], onDelete: Cascade)
+  swiped User @relation("SwipedByUsers", fields: [swipedId], references: [id], onDelete: Cascade)
+  
+  @@unique([swiperId, swipedId]) // Prevent duplicate swipes
+}
+
+model Connection {
+  id        Int      @id @default(autoincrement())
+  user1Id   Int
+  user2Id   Int
+  status    ConnectionStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user1 User @relation("UserConnections1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2 User @relation("UserConnections2", fields: [user2Id], references: [id], onDelete: Cascade)
+  
+  messages Message[]
+  
+  @@unique([user1Id, user2Id])
+}
+
+model Message {
+  id           Int        @id @default(autoincrement())
+  connectionId Int
+  senderId     Int
+  content      String
+  messageType  MessageType @default(TEXT)
+  isRead       Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  
+  connection Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  sender     User       @relation(fields: [senderId], references: [id], onDelete: Cascade)
+}
+
+enum SwipeAction {
+  LIKE
+  PASS
+}
+
+enum ConnectionStatus {
+  PENDING
+  MATCHED
+  BLOCKED
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  SYSTEM
 }
 
 enum MediaType {

@@ -16,7 +16,7 @@ import prisma from '../../database/prisma'
 //     res.json(SuccessResponse('Media added successfully', media))
 // }
 
-const fetchAnime = async (req: Request, res: Response) => {
+const fetchAnime = async (req: Request, res: Response): Promise<void> => {
     const { page = 1, limit = 20, search = '', sort = 'popularity' } = req.query
     try {
         const params: any = {
@@ -84,12 +84,12 @@ const fetchAnime = async (req: Request, res: Response) => {
             }
         }))
     } catch (error) {
-        console.error('Error fetching anime:', error);
+
         res.status(500).json({ error: 'Error fetching anime data' })
     }
 }
 
-const fetchAnimeById = async (req: Request, res: Response) => {
+const fetchAnimeById = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params
     try {
         const response = await axios.get(`https://api.jikan.moe/v4/anime/${id}`)
@@ -99,13 +99,24 @@ const fetchAnimeById = async (req: Request, res: Response) => {
     }
 }
 
-const fetchMovies = async (req: Request, res: Response) => {
+const fetchMovies = async (req: Request, res: Response): Promise<void> => {
     const { page = 1, search = '', sort = 'popularity.desc' } = req.query
     try {
+        // Validate page parameter (TMDB API limits: 1-500)
+        const pageNum = parseInt(page.toString());
+        if (pageNum < 1 || pageNum > 500) {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid page number. Pages must be between 1 and 500.',
+                data: null
+            });
+            return;
+        }
+
         let apiUrl = 'https://api.themoviedb.org/3/discover/movie';
         let params: any = {
             api_key: process.env.TMDB_API_KEY || '291df334d6477bfda873f22a41a6f1c9',
-            page,
+            page: pageNum,
             sort_by: sort.toString() // popularity.desc, release_date.desc, vote_average.desc, vote_count.desc
         };
 
@@ -114,7 +125,7 @@ const fetchMovies = async (req: Request, res: Response) => {
             apiUrl = 'https://api.themoviedb.org/3/search/movie';
             params = {
                 api_key: process.env.TMDB_API_KEY || '291df334d6477bfda873f22a41a6f1c9',
-                page,
+                page: pageNum,
                 query: search.toString().trim()
             };
         }
@@ -172,25 +183,58 @@ const fetchMovies = async (req: Request, res: Response) => {
             data: transformedMovies,
             pagination: {
                 currentPage: response.data.page,
-                totalPages: response.data.total_pages,
+                totalPages: Math.min(response.data.total_pages, 500), // Cap at 500 due to TMDB limit
                 totalResults: response.data.total_results,
-                hasNextPage: response.data.page < response.data.total_pages,
+                hasNextPage: response.data.page < Math.min(response.data.total_pages, 500),
                 hasPrevPage: response.data.page > 1
             }
         }))
-    } catch (error) {
-        console.error('Error fetching movies:', error);
-        res.status(500).json({ error: 'Error fetching movie data' })
+    } catch (error: any) {
+        // Handle TMDB API specific errors
+        if (error.response?.data?.status_code === 22) {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid page number. Please use a page between 1 and 500.',
+                data: null
+            });
+            return;
+        }
+        
+        if (error.response?.data?.status_message) {
+            res.status(400).json({
+                success: false,
+                message: error.response.data.status_message,
+                data: null
+            });
+            return;
+        }
+
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching movie data',
+            data: null
+        });
     }
 }
 
-const fetchSeries = async (req: Request, res: Response) => {
+const fetchSeries = async (req: Request, res: Response): Promise<void> => {
     const { page = 1, search = '', sort = 'popularity.desc' } = req.query
     try {
+        // Validate page parameter (TMDB API limits: 1-500)
+        const pageNum = parseInt(page.toString());
+        if (pageNum < 1 || pageNum > 500) {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid page number. Pages must be between 1 and 500.',
+                data: null
+            });
+            return;
+        }
+
         let apiUrl = 'https://api.themoviedb.org/3/discover/tv';
         let params: any = {
             api_key: process.env.TMDB_API_KEY || '291df334d6477bfda873f22a41a6f1c9',
-            page,
+            page: pageNum,
             sort_by: sort.toString() // popularity.desc, first_air_date.desc, vote_average.desc, vote_count.desc
         };
 
@@ -199,7 +243,7 @@ const fetchSeries = async (req: Request, res: Response) => {
             apiUrl = 'https://api.themoviedb.org/3/search/tv';
             params = {
                 api_key: process.env.TMDB_API_KEY || '291df334d6477bfda873f22a41a6f1c9',
-                page,
+                page: pageNum,
                 query: search.toString().trim()
             };
         }
@@ -257,19 +301,41 @@ const fetchSeries = async (req: Request, res: Response) => {
             data: transformedSeries,
             pagination: {
                 currentPage: response.data.page,
-                totalPages: response.data.total_pages,
+                totalPages: Math.min(response.data.total_pages, 500), // Cap at 500 due to TMDB limit
                 totalResults: response.data.total_results,
-                hasNextPage: response.data.page < response.data.total_pages,
+                hasNextPage: response.data.page < Math.min(response.data.total_pages, 500),
                 hasPrevPage: response.data.page > 1
             }
         }))
-    } catch (error) {
-        console.error('Error fetching series:', error);
-        res.status(500).json({ error: 'Error fetching series data' })
+    } catch (error: any) {
+        // Handle TMDB API specific errors
+        if (error.response?.data?.status_code === 22) {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid page number. Please use a page between 1 and 500.',
+                data: null
+            });
+            return;
+        }
+        
+        if (error.response?.data?.status_message) {
+            res.status(400).json({
+                success: false,
+                message: error.response.data.status_message,
+                data: null
+            });
+            return;
+        }
+
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching series data',
+            data: null
+        });
     }
 }
 
-const fetchMovieById = async (req: Request, res: Response) => {
+const fetchMovieById = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params
     try {
         const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}`, {
@@ -286,7 +352,7 @@ const fetchMovieById = async (req: Request, res: Response) => {
     }
 }
 
-const fetchSeriesById = async (req: Request, res: Response) => {
+const fetchSeriesById = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params
     try {
         const response = await axios.get(`https://api.themoviedb.org/3/tv/${id}`, {

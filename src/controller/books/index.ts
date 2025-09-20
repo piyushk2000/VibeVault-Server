@@ -101,7 +101,7 @@ const fetchBooks = async (req: Request, res: Response) => {
                             }
                         });
                     } catch (createError) {
-                        console.error('Error creating book:', createError);
+                
                         // If creation fails due to duplicate apiId, try to find existing
                         existingMedia = await prisma.media.findFirst({
                             where: { apiId: bookId }
@@ -132,11 +132,7 @@ const fetchBooks = async (req: Request, res: Response) => {
             }
         }));
     } catch (error) {
-        console.error('Error fetching books:', error);
-        if (error instanceof Error) {
-            console.error('Error details:', error.message);
-            console.error('Error stack:', error.stack);
-        }
+
         res.status(500).json({ 
             success: false,
             error: 'Error fetching book data',
@@ -161,7 +157,7 @@ const fetchBookById = async (req: Request, res: Response) => {
 
         res.json(SuccessResponse('Book details fetched successfully', bookData));
     } catch (error) {
-        console.error('Error fetching book details:', error);
+
         res.status(500).json({ error: 'Error fetching book details' });
     }
 };

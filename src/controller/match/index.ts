@@ -35,7 +35,7 @@ const getMatches = async (req: any, res: Response) => {
 
         res.json(SuccessResponse('Matches fetched successfully', matches));
     } catch (error) {
-        console.error("Error fetching matches:", error);
+
         res.status(500).json({ error: 'Error fetching matches' });
     }
 };
@@ -120,7 +120,7 @@ const calculateMatches = async (userId: number) => {
             }
         }
     } catch (error) {
-        console.error("Error calculating matches:", error);
+
     }
 };
 

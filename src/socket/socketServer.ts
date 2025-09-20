@@ -36,7 +36,7 @@ export const initializeSocket = (server: HTTPServer) => {
     });
 
     io.on('connection', (socket: any) => {
-        console.log(`User ${socket.userId} connected`);
+
 
         // Join connection rooms for active chats
         socket.on('join_connection', async (connectionId: number) => {
@@ -54,7 +54,7 @@ export const initializeSocket = (server: HTTPServer) => {
 
                 if (connection) {
                     socket.join(`connection_${connectionId}`);
-                    console.log(`User ${socket.userId} joined connection ${connectionId}`);
+
                 }
             } catch (error) {
                 console.error('Error joining connection:', error);
@@ -170,7 +170,7 @@ export const initializeSocket = (server: HTTPServer) => {
 
         // Handle disconnection
         socket.on('disconnect', () => {
-            console.log(`User ${socket.userId} disconnected`);
+
         });
     });
 

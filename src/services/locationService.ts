@@ -54,7 +54,7 @@ export class LocationService {
         displayName: `${city.name}, ${city.adminName1 ? city.adminName1 + ', ' : ''}${city.countryName}`
       }));
     } catch (error) {
-      console.error('Error searching cities:', error);
+
       // Return mock data for common cities when GeoNames is not available
       return this.getMockCities(query, maxRows);
     }
@@ -120,7 +120,7 @@ export class LocationService {
         displayName: `${city.name}, ${city.adminName1 ? city.adminName1 + ', ' : ''}${city.countryName}`
       };
     } catch (error) {
-      console.error('Error getting city by coordinates:', error);
+
       // Return approximate location based on coordinates
       return {
         id: Math.floor(Math.random() * 1000000),

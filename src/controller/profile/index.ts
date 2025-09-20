@@ -53,7 +53,7 @@ const getProfile = async (req: any, res: Response): Promise<void> => {
 
         res.json(SuccessResponse('Profile fetched successfully', profileData));
     } catch (error) {
-        console.error('Error fetching profile:', error);
+
         res.status(500).json(FailureResponse('Error fetching profile', '5001'));
     }
 };
@@ -126,7 +126,7 @@ const updateProfile = async (req: any, res: Response): Promise<void> => {
 
         res.json(SuccessResponse('Profile updated successfully', profileData));
     } catch (error) {
-        console.error('Error updating profile:', error);
+
         res.status(500).json(FailureResponse('Error updating profile', '5002'));
     }
 };
@@ -150,7 +150,7 @@ const updateUser = async (req: any, res: Response): Promise<void> => {
 
         res.json(SuccessResponse('User updated successfully', updatedUser));
     } catch (error) {
-        console.error('Error updating user:', error);
+
         res.status(500).json(FailureResponse('Error updating user', '5003'));
     }
 };
@@ -167,7 +167,7 @@ const searchLocations = async (req: Request, res: Response): Promise<void> => {
         const locations = await LocationService.searchCities(query, 10);
         res.json(SuccessResponse('Locations fetched successfully', locations));
     } catch (error) {
-        console.error('Error searching locations:', error);
+
         res.status(500).json(FailureResponse('Error searching locations', '5004'));
     }
 };
@@ -193,7 +193,7 @@ const getLocationByCoordinates = async (req: Request, res: Response): Promise<vo
 
         res.json(SuccessResponse('Location fetched successfully', location));
     } catch (error) {
-        console.error('Error getting location by coordinates:', error);
+
         res.status(500).json(FailureResponse('Error getting location', '5005'));
     }
 };

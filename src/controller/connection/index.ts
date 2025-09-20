@@ -79,7 +79,7 @@ const getConnections = async (req: any, res: Response): Promise<void> => {
 
         res.json(SuccessResponse('Connections fetched successfully', formattedConnections));
     } catch (error) {
-        console.error('Error fetching connections:', error);
+
         res.status(500).json(FailureResponse('Error fetching connections', '5007'));
     }
 };
@@ -153,7 +153,7 @@ const getConnectionMessages = async (req: any, res: Response): Promise<void> => 
 
         res.json(SuccessResponse('Messages fetched successfully', formattedMessages));
     } catch (error) {
-        console.error('Error fetching messages:', error);
+
         res.status(500).json(FailureResponse('Error fetching messages', '5008'));
     }
 };
@@ -225,7 +225,7 @@ const sendMessage = async (req: any, res: Response): Promise<void> => {
 
         res.json(SuccessResponse('Message sent successfully', formattedMessage));
     } catch (error) {
-        console.error('Error sending message:', error);
+
         res.status(500).json(FailureResponse('Error sending message', '5009'));
     }
 };

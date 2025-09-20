@@ -63,7 +63,7 @@ const addUserMedia = async (req: any, res: any) => {
 
         res.json(SuccessResponse('Media added to user list successfully', userMedia));
     } catch (error) {
-        console.error('Error adding user media:', error);
+
         res.status(500).json({ error: 'Error adding media to user list' });
     }
 };
@@ -103,7 +103,7 @@ const updateUserMedia = async (req: any, res: any) => {
 
         res.json(SuccessResponse('User media updated successfully', updatedUserMedia));
     } catch (error) {
-        console.error('Error updating user media:', error);
+
         res.status(500).json({ error: 'Error updating media in user list' });
     }
 };
@@ -134,7 +134,7 @@ const deleteUserMedia = async (req: any, res: any) => {
 
         res.json(SuccessResponse('Media removed from library successfully', { id: parseInt(id) }));
     } catch (error) {
-        console.error('Error deleting user media:', error);
+
         res.status(500).json({ error: 'Error removing media from user list' });
     }
 };

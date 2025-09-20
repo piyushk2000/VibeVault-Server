@@ -108,7 +108,7 @@ const getDiscoverUsers = async (req: any, res: Response): Promise<void> => {
 
         res.json(SuccessResponse('Users fetched successfully', formattedUsers));
     } catch (error) {
-        console.error('Error fetching discover users:', error);
+
         res.status(500).json(FailureResponse('Error fetching users', '5004'));
     }
 };
@@ -224,7 +224,7 @@ const swipeUser = async (req: any, res: Response): Promise<void> => {
             connection
         }));
     } catch (error) {
-        console.error('Error recording swipe:', error);
+
         res.status(500).json(FailureResponse('Error recording swipe', '5005'));
     }
 };
@@ -297,7 +297,7 @@ const getPendingSwipes = async (req: any, res: Response): Promise<void> => {
 
         res.json(SuccessResponse('Pending swipes fetched successfully', formattedPendingSwipes));
     } catch (error) {
-        console.error('Error fetching pending swipes:', error);
+
         res.status(500).json(FailureResponse('Error fetching pending swipes', '5006'));
     }
 };

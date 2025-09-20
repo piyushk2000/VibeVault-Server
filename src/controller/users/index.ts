@@ -19,21 +19,21 @@ interface SignInBody {
 const signUp = async (req: any, res: any) => {
   try {
     const { name, email, password }: SignUpBody = req.body;
-    console.log("🚀 ~ signUp ~ req.body:", req.body);
+
 
     // Basic input validation
     if (!name && !email && !password) {
       return res.status(400).json(FailureResponse("Please fill in all required fields", "4001"));
     }
-    
+
     if (!name) {
       return res.status(400).json(FailureResponse("Please enter your full name", "4002"));
     }
-    
+
     if (!email) {
       return res.status(400).json(FailureResponse("Please enter your email address", "4003"));
     }
-    
+
     if (!password) {
       return res.status(400).json(FailureResponse("Please enter a password", "4004"));
     }
@@ -82,7 +82,7 @@ const signUp = async (req: any, res: any) => {
       })
     );
   } catch (error) {
-    console.error(error);
+
     res.status(500).json(FailureResponse("Error creating user", "5122"));
   }
 };
@@ -95,11 +95,11 @@ const signIn = async (req: any, res: any) => {
     if (!email && !password) {
       return res.status(400).json(FailureResponse("Please enter your email and password", "4001"));
     }
-    
+
     if (!email) {
       return res.status(400).json(FailureResponse("Please enter your email address", "4002"));
     }
-    
+
     if (!password) {
       return res.status(400).json(FailureResponse("Please enter your password", "4003"));
     }
@@ -134,7 +134,7 @@ const signIn = async (req: any, res: any) => {
       SuccessResponse("Login successful", { token, user: userWithoutPassword })
     );
   } catch (error) {
-    console.error("Sign in error:", error);
+
     res.status(500).json(FailureResponse("Something went wrong during login. Please try again", "5039"));
   }
 };

@@ -55,7 +55,7 @@ router.get('/:matchId/common-media', validateToken, async (req: any, res: any) =
 
         res.json(SuccessResponse('Common media fetched successfully', formattedMedia));
     } catch (error) {
-        console.error('Error fetching common media:', error);
+
         res.status(500).json({ error: 'Error fetching common media' });
     }
 });

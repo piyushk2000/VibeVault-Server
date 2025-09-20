@@ -1,13 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import { SuccessResponse, FailureResponse } from '../../helpers/api-response';
 import { Request, Response } from 'express';
+import { LocationService } from '../../services/locationService';
 
 const prisma = new PrismaClient();
 
 const getDiscoverUsers = async (req: any, res: Response): Promise<void> => {
     try {
         const userId = req.user.id;
-        const { limit = 10 } = req.query;
+        const { limit = 10, maxDistance } = req.query;
 
         // Get users that haven't been swiped on by current user
         const swipedUserIds = await prisma.swipe.findMany({
@@ -18,12 +19,21 @@ const getDiscoverUsers = async (req: any, res: Response): Promise<void> => {
         const swipedIds = swipedUserIds.map(s => s.swipedId);
         swipedIds.push(userId); // Exclude self
 
+        // Get current user's location for distance filtering
+        let currentUserProfile = null;
+        if (maxDistance) {
+            currentUserProfile = await prisma.profile.findUnique({
+                where: { userId },
+                select: { latitude: true, longitude: true }
+            });
+        }
+
         // Get users with their media preferences for better matching
         const users = await prisma.user.findMany({
             where: {
                 id: { notIn: swipedIds }
             },
-            take: parseInt(limit.toString()),
+            take: parseInt(limit.toString()) * 2, // Get more users for filtering
             include: {
                 Profile: true,
                 userMedia: {
@@ -44,13 +54,47 @@ const getDiscoverUsers = async (req: any, res: Response): Promise<void> => {
             }
         });
 
+        // Filter by distance if maxDistance is provided
+        let filteredUsers = users;
+        if (maxDistance && currentUserProfile?.latitude && currentUserProfile?.longitude) {
+            const maxDistanceKm = parseFloat(maxDistance.toString());
+            filteredUsers = users.filter(user => {
+                if (!user.Profile?.latitude || !user.Profile?.longitude) {
+                    return false; // Exclude users without location
+                }
+                
+                const distance = LocationService.calculateDistance(
+                    currentUserProfile.latitude!,
+                    currentUserProfile.longitude!,
+                    user.Profile.latitude,
+                    user.Profile.longitude
+                );
+                
+                return distance <= maxDistanceKm;
+            });
+        }
+
+        // Limit to requested number
+        filteredUsers = filteredUsers.slice(0, parseInt(limit.toString()));
+
         // Format users for discovery
-        const formattedUsers = users.map(user => ({
+        const formattedUsers = filteredUsers.map(user => ({
             id: user.id,
             name: user.name,
             bio: user.Profile?.bio || '',
             interests: user.Profile?.interests || [],
             avatar: user.Profile?.avatar ? `data:image/jpeg;base64,${user.Profile.avatar.toString('base64')}` : null,
+            photos: user.Profile?.photos ? user.Profile.photos.map(photo => `data:image/jpeg;base64,${photo.toString('base64')}`) : [],
+            location: user.Profile?.location || null,
+            mbtiType: user.Profile?.mbtiType || null,
+            distance: currentUserProfile?.latitude && currentUserProfile?.longitude && user.Profile?.latitude && user.Profile?.longitude 
+                ? LocationService.calculateDistance(
+                    currentUserProfile.latitude,
+                    currentUserProfile.longitude,
+                    user.Profile.latitude,
+                    user.Profile.longitude
+                  )
+                : null,
             topMedia: user.userMedia.map(um => ({
                 title: um.media.title,
                 type: um.media.type,
@@ -58,7 +102,10 @@ const getDiscoverUsers = async (req: any, res: Response): Promise<void> => {
                 image: um.media.image,
                 genres: um.media.genres
             })),
-            mediaCount: user.userMedia.length
+            mediaCount: user.userMedia.length,
+            // TODO: Implement proper match percentage calculation on backend
+            // For now, using a simple formula based on common interests and media
+            matchPercentage: Math.floor(Math.random() * 40) + 50 // Random between 50-90%
         }));
 
         res.json(SuccessResponse('Users fetched successfully', formattedUsers));

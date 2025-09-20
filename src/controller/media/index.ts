@@ -19,12 +19,12 @@ const prisma = new PrismaClient()
 // }
 
 const fetchAnime = async (req: Request, res: Response) => {
-    const { page = 1, limit = 20, search = '' } = req.query
+    const { page = 1, limit = 20, search = '', sort = 'popularity' } = req.query
     try {
         const params: any = {
             page,
             limit,
-            order: 'popularity',
+            order: sort.toString(), // popularity, ranked, name, aired_on, episodes, status
             locale: 'en'
         };
 
@@ -102,13 +102,13 @@ const fetchAnimeById = async (req: Request, res: Response) => {
 }
 
 const fetchMovies = async (req: Request, res: Response) => {
-    const { page = 1, search = '' } = req.query
+    const { page = 1, search = '', sort = 'popularity.desc' } = req.query
     try {
         let apiUrl = 'https://api.themoviedb.org/3/discover/movie';
         let params: any = {
             api_key: process.env.TMDB_API_KEY || '291df334d6477bfda873f22a41a6f1c9',
             page,
-            sort_by: 'popularity.desc'
+            sort_by: sort.toString() // popularity.desc, release_date.desc, vote_average.desc, vote_count.desc
         };
 
         // Use search API if search query is provided
@@ -187,13 +187,13 @@ const fetchMovies = async (req: Request, res: Response) => {
 }
 
 const fetchSeries = async (req: Request, res: Response) => {
-    const { page = 1, search = '' } = req.query
+    const { page = 1, search = '', sort = 'popularity.desc' } = req.query
     try {
         let apiUrl = 'https://api.themoviedb.org/3/discover/tv';
         let params: any = {
             api_key: process.env.TMDB_API_KEY || '291df334d6477bfda873f22a41a6f1c9',
             page,
-            sort_by: 'popularity.desc'
+            sort_by: sort.toString() // popularity.desc, first_air_date.desc, vote_average.desc, vote_count.desc
         };
 
         // Use search API if search query is provided

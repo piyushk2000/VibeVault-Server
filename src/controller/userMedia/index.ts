@@ -71,25 +71,74 @@ const addUserMedia = async (req: any, res: any) => {
 };
 
 const updateUserMedia = async (req: any, res: any) => {
-    const userId = req.user.id;
-    const { id } = req.params;
-    const { status, rating, progress, type } = req.body;
+    try {
+        const userId = req.user.id;
+        const { id } = req.params;
+        const { status, rating, review } = req.body;
 
-    // Update userMedia entry
-    const userMedia = await prisma.userMedia.updateMany({
-        where: {
-            id: parseInt(id),
-            userId,
-        },
-        data: {
-            status,
-            rating,
-            progress: status === 'COMPLETED' ? undefined : progress,
-            type, // Add the type field to updates
-        },
-    });
+        // Check if the userMedia belongs to the current user
+        const existingUserMedia = await prisma.userMedia.findFirst({
+            where: {
+                id: parseInt(id),
+                userId,
+            },
+        });
 
-    res.json(SuccessResponse('User media updated successfully', userMedia));
+        if (!existingUserMedia) {
+            return res.status(404).json({ error: 'Media not found in your library' });
+        }
+
+        // Update userMedia entry
+        const updatedUserMedia = await prisma.userMedia.update({
+            where: {
+                id: parseInt(id),
+            },
+            data: {
+                status,
+                rating: rating || 0,
+                review: review || undefined,
+            },
+            include: {
+                media: true,
+            },
+        });
+
+        res.json(SuccessResponse('User media updated successfully', updatedUserMedia));
+    } catch (error) {
+        console.error('Error updating user media:', error);
+        res.status(500).json({ error: 'Error updating media in user list' });
+    }
+};
+
+const deleteUserMedia = async (req: any, res: any) => {
+    try {
+        const userId = req.user.id;
+        const { id } = req.params;
+
+        // Check if the userMedia belongs to the current user
+        const existingUserMedia = await prisma.userMedia.findFirst({
+            where: {
+                id: parseInt(id),
+                userId,
+            },
+        });
+
+        if (!existingUserMedia) {
+            return res.status(404).json({ error: 'Media not found in your library' });
+        }
+
+        // Delete userMedia entry
+        await prisma.userMedia.delete({
+            where: {
+                id: parseInt(id),
+            },
+        });
+
+        res.json(SuccessResponse('Media removed from library successfully', { id: parseInt(id) }));
+    } catch (error) {
+        console.error('Error deleting user media:', error);
+        res.status(500).json({ error: 'Error removing media from user list' });
+    }
 };
 
 const getUserMedia = async (req: any, res: any) => {
@@ -101,4 +150,4 @@ const getUserMedia = async (req: any, res: any) => {
     res.json(SuccessResponse('User media fetched successfully', userMedias));
 };
 
-export { addUserMedia, updateUserMedia, getUserMedia };
+export { addUserMedia, updateUserMedia, deleteUserMedia, getUserMedia };

@@ -12,6 +12,11 @@ model Profile {
   bio       String?
   interests String[]
   avatar    Bytes?   // Store profile picture as blob
+  photos    Bytes[]  // Store multiple photos (max 10)
+  location  String?  // User location (city, country)
+  latitude  Float?   // Location coordinates
+  longitude Float?   // Location coordinates
+  mbtiType  MBTIType? // MBTI personality type
   userId    Int      @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -146,6 +151,7 @@ enum MediaType {
   ANIME
   MOVIE
   SHOW
+  BOOK
 }
 
 enum Status {
@@ -153,4 +159,23 @@ enum Status {
   COMPLETED
   PLAN_TO_WATCH
   DROPPED
+}
+
+enum MBTIType {
+  INTJ
+  INTP
+  ENTJ
+  ENTP
+  INFJ
+  INFP
+  ENFJ
+  ENFP
+  ISTJ
+  ISFJ
+  ESTJ
+  ESFJ
+  ISTP
+  ISFP
+  ESTP
+  ESFP
 }

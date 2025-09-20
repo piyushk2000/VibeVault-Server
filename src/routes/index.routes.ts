@@ -6,6 +6,7 @@ import matchRouter from './match.routes'
 import profileRouter from './profile.routes'
 import swipeRouter from './swipe.routes'
 import connectionRouter from './connection.routes'
+import booksRouter from './books.routes'
 
 const router = Router()
 
@@ -15,6 +16,7 @@ router.get('/', (req, res) => {
 
 router.use('/users' ,userRouter )
 router.use('/media', mediaRouter )
+router.use('/books', booksRouter )
 router.use('/myMedia', userMediaRouter)
 router.use('/matches', matchRouter)
 router.use('/profile', profileRouter)

@@ -1,11 +1,10 @@
 import { Router } from 'express';
 import { getMatches } from '../controller/match';
 import { validateToken } from '../middleware/auth.middleware';
-import { PrismaClient } from '@prisma/client';
 import { SuccessResponse } from '../helpers/api-response';
+import prisma from '../database/prisma';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // Get matches for the current user
 router.get('/', validateToken, getMatches);

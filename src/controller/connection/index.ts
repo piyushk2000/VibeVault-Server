@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import { SuccessResponse, FailureResponse } from '../../helpers/api-response';
 import { Request, Response } from 'express';
-
-const prisma = new PrismaClient();
+import prisma from '../../database/prisma';
 
 const getConnections = async (req: any, res: Response): Promise<void> => {
     try {

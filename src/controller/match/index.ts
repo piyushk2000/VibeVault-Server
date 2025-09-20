@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client'
 import { SuccessResponse } from '../../helpers/api-response'
 import { Request, Response } from 'express'
-
-const prisma = new PrismaClient()
+import prisma from '../../database/prisma'
 
 /**
  * Get matches for the currently logged-in user

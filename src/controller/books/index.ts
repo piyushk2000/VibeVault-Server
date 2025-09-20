@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
 import { SuccessResponse } from '../../helpers/api-response';
 import axios from 'axios';
 import { Request, Response } from 'express';
-
-const prisma = new PrismaClient();
+import prisma from '../../database/prisma';
 
 const fetchBooks = async (req: Request, res: Response) => {
     const { page = 1, search = '', sort = 'new' } = req.query;

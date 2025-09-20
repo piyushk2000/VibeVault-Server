@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
 import { SuccessResponse, FailureResponse } from '../../helpers/api-response';
 import { Request, Response } from 'express';
 import { LocationService } from '../../services/locationService';
-
-const prisma = new PrismaClient();
+import prisma from '../../database/prisma';
 
 const getDiscoverUsers = async (req: any, res: Response): Promise<void> => {
     try {

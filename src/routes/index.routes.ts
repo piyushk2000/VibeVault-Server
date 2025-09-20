@@ -7,6 +7,7 @@ import profileRouter from './profile.routes'
 import swipeRouter from './swipe.routes'
 import connectionRouter from './connection.routes'
 import booksRouter from './books.routes'
+import healthRouter from './health.routes'
 
 const router = Router()
 
@@ -14,6 +15,7 @@ router.get('/', (req, res) => {
     res.send('Hey World!')
 })
 
+router.use('/', healthRouter)
 router.use('/users' ,userRouter )
 router.use('/media', mediaRouter )
 router.use('/books', booksRouter )

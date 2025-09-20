@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client'
 import { SuccessResponse } from '../../helpers/api-response'
 import axios from 'axios'
 import { Request, Response } from 'express'
-
-const prisma = new PrismaClient()
+import prisma from '../../database/prisma'
 
 const addUserMedia = async (req: any, res: any) => {
     try {

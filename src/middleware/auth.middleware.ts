@@ -1,9 +1,10 @@
 import jwt from 'jsonwebtoken'
+import { FailureResponse } from '../helpers/api-response'
 
 export const validateToken = async (req: any, res: any, next: any) => {
     const authHeader = req.headers.authorization
     if (!authHeader) {
-        return res.status(401).json({ message: 'No authorization header provided' })
+        return res.status(401).json(FailureResponse('No authorization header provided', '4010'))
     }
     
     let token = authHeader
@@ -13,7 +14,7 @@ export const validateToken = async (req: any, res: any, next: any) => {
     }
     
     if (!token) {
-        return res.status(401).json({ message: 'No token provided' })
+        return res.status(401).json(FailureResponse('No token provided', '4011'))
     }
     
     try {
@@ -21,6 +22,6 @@ export const validateToken = async (req: any, res: any, next: any) => {
         req.user = { id: decoded.userId }
         next()
     } catch (error) {
-        return res.status(401).json({ message: 'Invalid token' })
+        return res.status(401).json(FailureResponse('Invalid or expired token', '4012'))
     }
 }

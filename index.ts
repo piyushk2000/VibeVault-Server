@@ -12,9 +12,26 @@ const app = express()
 const server = createServer(app)
 const port = process.env.PORT || 3000
 
-app.use(cors())
+// Configure CORS to allow all origins
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false
+}))
+
 app.use(express.json({ limit: '10mb' })) // Increased limit for profile pictures
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
+
+// Default route - server status
+app.get('/', (req, res) => {
+  res.json({
+    message: 'VibeVault Server is running! 🚀',
+    status: 'active',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  })
+})
 
 app.use('', router)
 

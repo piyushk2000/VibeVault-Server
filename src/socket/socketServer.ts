@@ -10,7 +10,7 @@ interface AuthenticatedSocket extends Socket {
 export const initializeSocket = (server: HTTPServer) => {
     const io = new SocketIOServer(server, {
         cors: {
-            origin: "http://localhost:5173",
+            origin: "*",
             methods: ["GET", "POST"]
         }
     });

@@ -137,14 +137,23 @@ const fetchMovies = async (req: Request, res: Response): Promise<void> => {
             }
         })
 
-        // Get genre names (cache this for better performance)
-        const genreResponse = await axios.get('https://api.themoviedb.org/3/genre/movie/list', {
-            params: { api_key: process.env.TMDB_API_KEY || '291df334d6477bfda873f22a41a6f1c9' }
-        });
-        const genreMap = genreResponse.data.genres.reduce((acc: any, genre: any) => {
-            acc[genre.id] = genre.name;
-            return acc;
-        }, {});
+        // Get genre names (with error handling - don't fail if genre API fails)
+        let genreMap = {};
+        try {
+            const genreResponse = await axios.get('https://api.themoviedb.org/3/genre/movie/list', {
+                params: { api_key: process.env.TMDB_API_KEY || '291df334d6477bfda873f22a41a6f1c9' },
+                timeout: 5000 // 5 second timeout
+            });
+            genreMap = genreResponse.data.genres.reduce((acc: any, genre: any) => {
+                acc[genre.id] = genre.name;
+                return acc;
+            }, {});
+        } catch (genreError) {
+            console.warn('Failed to fetch movie genres, using genre IDs instead:', genreError.message);
+            // Continue without genre names - frontend can handle this
+        }
+
+        console.log(`Movies API call successful: ${apiUrl.includes('search') ? 'search' : 'discover'}, page: ${pageNum}, results: ${response.data.results?.length || 0}`)
 
         // Transform and store movie data
         const transformedMovies = await Promise.all(
@@ -161,7 +170,7 @@ const fetchMovies = async (req: Request, res: Response): Promise<void> => {
                             apiId: movie.id,
                             title: movie.title || movie.original_title || 'Unknown Title',
                             description: movie.overview || 'No description available',
-                            genres: movie.genre_ids?.map((id: number) => genreMap[id]).filter(Boolean) || [],
+                            genres: movie.genre_ids?.map((id: number) => genreMap[id] || `Genre ${id}`).filter(Boolean) || [],
                             image: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '',
                             type: 'MOVIE',
                             meta: {
@@ -255,14 +264,23 @@ const fetchSeries = async (req: Request, res: Response): Promise<void> => {
             }
         })
 
-        // Get genre names (cache this for better performance)
-        const genreResponse = await axios.get('https://api.themoviedb.org/3/genre/tv/list', {
-            params: { api_key: process.env.TMDB_API_KEY || '291df334d6477bfda873f22a41a6f1c9' }
-        });
-        const genreMap = genreResponse.data.genres.reduce((acc: any, genre: any) => {
-            acc[genre.id] = genre.name;
-            return acc;
-        }, {});
+        // Get genre names (with error handling - don't fail if genre API fails)
+        let genreMap = {};
+        try {
+            const genreResponse = await axios.get('https://api.themoviedb.org/3/genre/tv/list', {
+                params: { api_key: process.env.TMDB_API_KEY || '291df334d6477bfda873f22a41a6f1c9' },
+                timeout: 5000 // 5 second timeout
+            });
+            genreMap = genreResponse.data.genres.reduce((acc: any, genre: any) => {
+                acc[genre.id] = genre.name;
+                return acc;
+            }, {});
+        } catch (genreError) {
+            console.warn('Failed to fetch TV genres, using genre IDs instead:', genreError.message);
+            // Continue without genre names - frontend can handle this
+        }
+
+        console.log(`Series API call successful: ${apiUrl.includes('search') ? 'search' : 'discover'}, page: ${pageNum}, results: ${response.data.results?.length || 0}`)
 
         // Transform and store TV series data
         const transformedSeries = await Promise.all(
@@ -279,7 +297,7 @@ const fetchSeries = async (req: Request, res: Response): Promise<void> => {
                             apiId: series.id,
                             title: series.name || series.original_name || 'Unknown Title',
                             description: series.overview || 'No description available',
-                            genres: series.genre_ids?.map((id: number) => genreMap[id]).filter(Boolean) || [],
+                            genres: series.genre_ids?.map((id: number) => genreMap[id] || `Genre ${id}`).filter(Boolean) || [],
                             image: series.poster_path ? `https://image.tmdb.org/t/p/w500${series.poster_path}` : '',
                             type: 'SHOW',
                             meta: {

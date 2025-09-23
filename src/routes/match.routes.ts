@@ -9,7 +9,6 @@ const router = Router();
 // Get matches for the current user
 router.get('/', validateToken, getMatches);
 
-// Get common media details for a specific match
 router.get('/:matchId/common-media', validateToken, async (req: any, res: any) => {
     try {
         const userId = req.user.id;

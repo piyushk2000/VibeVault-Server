@@ -2,6 +2,7 @@ import { SuccessResponse } from '../../helpers/api-response'
 import axios from 'axios'
 import { Request, Response } from 'express'
 import prisma from '../../database/prisma'
+import { mediaCache } from '../../utils/cache'
 
 // const addMediaToUser = async (req: any, res: any) => {
 //     console.log(req.body)
@@ -18,6 +19,22 @@ import prisma from '../../database/prisma'
 
 const fetchAnime = async (req: Request, res: Response): Promise<void> => {
     const { page = 1, limit = 20, search = '', sort = 'popularity' } = req.query
+
+    // Create cache key parameters
+    const cacheParams = {
+      page: page.toString(),
+      limit: limit.toString(),
+      search: search.toString(),
+      sort: sort.toString()
+    };
+
+    // Check cache first
+    const cachedResult = mediaCache.get('anime', cacheParams);
+    if (cachedResult) {
+        res.json(SuccessResponse('Anime fetched from cache', cachedResult));
+        return;
+    }
+
     try {
         const params: any = {
             page,
@@ -74,7 +91,7 @@ const fetchAnime = async (req: Request, res: Response): Promise<void> => {
         const hasNextPage = response.data.length === limitNum;
         const hasPrevPage = currentPageNum > 1;
 
-        res.json(SuccessResponse('Anime fetched successfully', {
+        const result = {
             data: transformedAnime,
             pagination: {
                 currentPage: currentPageNum,
@@ -82,7 +99,12 @@ const fetchAnime = async (req: Request, res: Response): Promise<void> => {
                 hasNextPage,
                 hasPrevPage
             }
-        }))
+        };
+
+        // Cache the result (only if <= 100 results)
+        mediaCache.set('anime', cacheParams, result, transformedAnime.length);
+
+        res.json(SuccessResponse('Anime fetched successfully', result))
     } catch (error) {
 
         res.status(500).json({ error: 'Error fetching anime data' })
@@ -101,6 +123,21 @@ const fetchAnimeById = async (req: Request, res: Response): Promise<void> => {
 
 const fetchMovies = async (req: Request, res: Response): Promise<void> => {
     const { page = 1, search = '', sort = 'popularity.desc' } = req.query
+
+    // Create cache key parameters
+    const cacheParams = {
+      page: page.toString(),
+      search: search.toString(),
+      sort: sort.toString()
+    };
+
+    // Check cache first
+    const cachedResult = mediaCache.get('movies', cacheParams);
+    if (cachedResult) {
+        res.json(SuccessResponse('Movies fetched from cache', cachedResult));
+        return;
+    }
+
     try {
         // Validate page parameter (TMDB API limits: 1-500)
         const pageNum = parseInt(page.toString());
@@ -188,7 +225,7 @@ const fetchMovies = async (req: Request, res: Response): Promise<void> => {
             })
         );
 
-        res.json(SuccessResponse('Movies fetched successfully', {
+        const result = {
             data: transformedMovies,
             pagination: {
                 currentPage: response.data.page,
@@ -197,7 +234,12 @@ const fetchMovies = async (req: Request, res: Response): Promise<void> => {
                 hasNextPage: response.data.page < Math.min(response.data.total_pages, 500),
                 hasPrevPage: response.data.page > 1
             }
-        }))
+        };
+
+        // Cache the result (only if <= 100 results)
+        mediaCache.set('movies', cacheParams, result, transformedMovies.length);
+
+        res.json(SuccessResponse('Movies fetched successfully', result))
     } catch (error: any) {
         // Handle TMDB API specific errors
         if (error.response?.data?.status_code === 22) {
@@ -228,6 +270,21 @@ const fetchMovies = async (req: Request, res: Response): Promise<void> => {
 
 const fetchSeries = async (req: Request, res: Response): Promise<void> => {
     const { page = 1, search = '', sort = 'popularity.desc' } = req.query
+
+    // Create cache key parameters
+    const cacheParams = {
+      page: page.toString(),
+      search: search.toString(),
+      sort: sort.toString()
+    };
+
+    // Check cache first
+    const cachedResult = mediaCache.get('series', cacheParams);
+    if (cachedResult) {
+        res.json(SuccessResponse('Series fetched from cache', cachedResult));
+        return;
+    }
+
     try {
         // Validate page parameter (TMDB API limits: 1-500)
         const pageNum = parseInt(page.toString());
@@ -315,7 +372,7 @@ const fetchSeries = async (req: Request, res: Response): Promise<void> => {
             })
         );
 
-        res.json(SuccessResponse('Series fetched successfully', {
+        const result = {
             data: transformedSeries,
             pagination: {
                 currentPage: response.data.page,
@@ -324,7 +381,12 @@ const fetchSeries = async (req: Request, res: Response): Promise<void> => {
                 hasNextPage: response.data.page < Math.min(response.data.total_pages, 500),
                 hasPrevPage: response.data.page > 1
             }
-        }))
+        };
+
+        // Cache the result (only if <= 100 results)
+        mediaCache.set('series', cacheParams, result, transformedSeries.length);
+
+        res.json(SuccessResponse('Series fetched successfully', result))
     } catch (error: any) {
         // Handle TMDB API specific errors
         if (error.response?.data?.status_code === 22) {
